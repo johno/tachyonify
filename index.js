@@ -9,6 +9,7 @@ var removeComments = require('postcss-discard-comments')
 var removeEmpty = require('postcss-discard-empty')
 var hasClass = require('has-class-selector')
 var isBlank = require('is-blank')
+var isPresent = require('is-present')
 var isNan = require('is-nan')
 
 var props = {}
@@ -34,7 +35,7 @@ module.exports = function tachyonify (html, css) {
     resultingClasses.push(searchForClassFromPropAndVal(prop))
   })
 
-  console.log(resultingClasses)
+  console.log(resultingClasses.filter(isPresent).map(function (c) { return c.replace('.', '') }).join(' '))
 }
 
 function searchForClassFromPropAndVal(prop) {

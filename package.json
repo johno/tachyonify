@@ -18,6 +18,7 @@
     "has-class-selector": "^1.0.0",
     "is-blank": "^1.1.0",
     "is-nan": "^1.2.1",
+    "is-present": "^1.0.0",
     "postcss": "^5.0.19",
     "postcss-discard-comments": "^2.0.4",
     "postcss-discard-empty": "^2.0.1",

@@ -22,7 +22,7 @@ module.exports = function tachyonify (html, css) {
     return '.' + klass
   })
 
-  postcss([ select(classes), removeEmpty(), shorthandExpand(), getProperties() ]).process(css).css
+  console.log(postcss([ select(classes), removeEmpty(), shorthandExpand(), getProperties() ]).process(css).css)
   postcss([ removeMediaQueries(), selectByProperty(props), removeEmpty(), removeComments({ removeAll: true }) ]).process(tachyonsCss).css
 
   console.log(props)
@@ -35,7 +35,10 @@ module.exports = function tachyonify (html, css) {
     resultingClasses.push(searchForClassFromPropAndVal(prop))
   })
 
+  console.log('---------------------------')
+  console.log(classes.map(function (c) { return c.replace('.', '') }).join(' ') + ' converted to')
   console.log(resultingClasses.filter(isPresent).map(function (c) { return c.replace('.', '') }).join(' '))
+  console.log('---------------------------')
 }
 
 function searchForClassFromPropAndVal(prop) {

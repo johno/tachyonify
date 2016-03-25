@@ -8,8 +8,10 @@ var shorthandExpand = require('postcss-shorthand-expand')
 var removeComments = require('postcss-discard-comments')
 var removeEmpty = require('postcss-discard-empty')
 var hasClass = require('has-class-selector')
+var getContrast = require('get-contrast').ratio
 var isBlank = require('is-blank')
 var isPresent = require('is-present')
+var isColor = require('is-color')
 var isNan = require('is-nan')
 
 var props = {}
@@ -50,31 +52,44 @@ function searchForClassFromPropAndVal(prop) {
     return
   }
 
-  var val = convertToRem(props[prop][0])
-
-  if (isNan(val)) {
-    val = props[prop][0]
-
+  if (isColor(props[prop][0])) {
+    var val = props[prop][0]
     console.log('looking for ' + val)
     console.log(classesByProp[prop])
-    classesByProp[prop].forEach(function (obj) {
-      if (val === obj.value) {
-        closestClass = obj.class
-      }
-    })
-  } else {
-    var valsForReduce = classesByProp[prop].map(function (obj) {
-      obj.value = convertToRem(obj.value)
-      return obj
-    }).filter(function (obj) {
-      return !isInPct(obj.value)
-    })
 
-    closestClass = valsForReduce.reduce(function (prev, curr) {
-      return (Math.abs(curr.value - val) < Math.abs(prev.value - val) ? curr : prev)
+    closestClass = classesByProp[prop].map(function (obj) {
+      obj.value = getContrast(obj.value, val)
+      return obj
+    }).reduce(function (prev, curr) {
+      return curr.value < prev.value ? curr : prev
     }).class
-    console.log('looking for ' + val)
-    console.log(valsForReduce)
+  } else {
+    var val = convertToRem(props[prop][0])
+
+    if (isNan(val)) {
+      val = props[prop][0]
+
+      console.log('looking for ' + val)
+      console.log(classesByProp[prop])
+      classesByProp[prop].forEach(function (obj) {
+        if (val === obj.value) {
+          closestClass = obj.class
+        }
+      })
+    } else {
+      var valsForReduce = classesByProp[prop].map(function (obj) {
+        obj.value = convertToRem(obj.value)
+        return obj
+      }).filter(function (obj) {
+        return !isInPct(obj.value)
+      })
+
+      closestClass = valsForReduce.reduce(function (prev, curr) {
+        return (Math.abs(curr.value - val) < Math.abs(prev.value - val) ? curr : prev)
+      }).class
+      console.log('looking for ' + val)
+      console.log(valsForReduce)
+    }
   }
 
   console.log(closestClass)

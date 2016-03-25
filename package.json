@@ -15,8 +15,10 @@
   "license": "MIT",
   "dependencies": {
     "get-classes-from-html": "^1.0.1",
+    "get-contrast": "^1.1.1",
     "has-class-selector": "^1.0.0",
     "is-blank": "^1.1.0",
+    "is-color": "^0.2.0",
     "is-nan": "^1.2.1",
     "is-present": "^1.0.0",
     "postcss": "^5.0.19",

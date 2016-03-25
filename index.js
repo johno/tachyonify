@@ -24,7 +24,7 @@ module.exports = function tachyonify (html, css) {
     return '.' + klass
   })
 
-  console.log(postcss([ select(classes), removeEmpty(), shorthandExpand(), getProperties() ]).process(css).css)
+  postcss([ select(classes), removeEmpty(), shorthandExpand(), getProperties() ]).process(css).css
   postcss([ removeMediaQueries(), selectByProperty(props), removeEmpty(), removeComments({ removeAll: true }) ]).process(tachyonsCss).css
 
   console.log(props)
@@ -52,14 +52,16 @@ function searchForClassFromPropAndVal(prop) {
     return
   }
 
-  if (isColor(props[prop][0])) {
+  if (isColor(props[prop][0]) && props[prop][0] != 'transparent') {
     var val = props[prop][0]
-    console.log('looking for ' + val)
+    console.log('looking for ' + prop + ' with ' + val)
     console.log(classesByProp[prop])
 
     closestClass = classesByProp[prop].map(function (obj) {
-      obj.value = getContrast(obj.value, val)
-      return obj
+      return {
+        value: getContrast(obj.value, val),
+        class: obj.class
+      }
     }).reduce(function (prev, curr) {
       return curr.value < prev.value ? curr : prev
     }).class
@@ -78,8 +80,10 @@ function searchForClassFromPropAndVal(prop) {
       })
     } else {
       var valsForReduce = classesByProp[prop].map(function (obj) {
-        obj.value = convertToRem(obj.value)
-        return obj
+        return {
+          value: convertToRem(obj.value),
+          class: obj.class
+        }
       }).filter(function (obj) {
         return !isInPct(obj.value)
       })
@@ -93,6 +97,7 @@ function searchForClassFromPropAndVal(prop) {
   }
 
   console.log(closestClass)
+
   console.log('------')
   return closestClass
 }
@@ -104,7 +109,7 @@ function convertToRem (value) {
     return value
   }
 
-  return value.replace('px', '').replace('em', '') / 16
+  return value.toString().replace('px', '').replace('em', '') / 16
 }
 
 function isInPx (value) {
@@ -112,7 +117,7 @@ function isInPx (value) {
 }
 
 function isInRem (value) {
-  return value.indexOf('rem') > -1
+  return value.toString().indexOf('rem') > -1
 }
 
 function isInEm (value) {

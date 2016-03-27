@@ -9,6 +9,7 @@ var removeComments = require('postcss-discard-comments')
 var removeEmpty = require('postcss-discard-empty')
 var hasClass = require('has-class-selector')
 var getContrast = require('get-contrast').ratio
+var extendObj = require('extend-object')
 var isBlank = require('is-blank')
 var isPresent = require('is-present')
 var isColor = require('is-color')
@@ -25,35 +26,45 @@ module.exports = function tachyonify (html, css) {
   })
 
   console.log(postcss([ select(classes), removeEmpty(), shorthandExpand(), getProperties() ]).process(css).css)
-  postcss([ removeMediaQueries(), selectByProperty(props), removeEmpty(), removeComments({ removeAll: true }) ]).process(tachyonsCss).css
+  var propsToSelect = {}
+  Object.keys(props).forEach(function (klass) {
+    extendObj(propsToSelect, props[klass])
+  })
+  console.log('----')
+  console.log(propsToSelect)
+  console.log('----')
+  postcss([ removeMediaQueries(), selectByProperty(propsToSelect), removeEmpty(), removeComments({ removeAll: true }) ]).process(tachyonsCss).css
 
   console.log(props)
 
   var propsToIgnore = ['font-family', 'src']
-  var resultingClasses = []
-  Object.keys(props).filter(function (prop) {
-    return propsToIgnore.indexOf(prop) === -1
-  }).forEach(function (prop) {
-    resultingClasses.push(searchForClassFromPropAndVal(prop))
+  var resultingClasses = {}
+  Object.keys(props).forEach(function (klass) {
+    Object.keys(props[klass]).filter(function (prop) {
+      return propsToIgnore.indexOf(prop) === -1
+    }).forEach(function (prop) {
+      resultingClasses[klass] = resultingClasses[klass] || []
+      resultingClasses[klass].push(searchForClassFromPropAndVal(klass, prop))
+    })
   })
 
   console.log('---------------------------')
   console.log(classes.map(function (c) { return c.replace('.', '') }).join(' ') + ' converted to')
-  console.log(resultingClasses.filter(isPresent).map(function (c) { return c.replace('.', '') }).join(' '))
+  console.log(resultingClasses)
   console.log('---------------------------')
 }
 
-function searchForClassFromPropAndVal(prop) {
+function searchForClassFromPropAndVal(klass, prop) {
   var closestClass = null
-  console.log('------' + prop + ' with ' + props[prop][0])
+  console.log('------' + prop + ' with ' + props[klass][prop][0])
   console.log(classesByProp[prop])
 
   if (isBlank(classesByProp[prop])) {
     return
   }
 
-  if (isColor(props[prop][0])) {
-    var val = props[prop][0]
+  if (isColor(props[klass][prop][0])) {
+    var val = props[klass][prop][0]
     console.log('looking for ' + val)
     console.log(classesByProp[prop])
 
@@ -64,10 +75,10 @@ function searchForClassFromPropAndVal(prop) {
       return curr.value < prev.value ? curr : prev
     }).class
   } else {
-    var val = convertToRem(props[prop][0])
+    var val = convertToRem(props[klass][prop][0])
 
     if (isNan(val)) {
-      val = props[prop][0]
+      val = props[klass][prop][0]
 
       console.log('looking for ' + val)
       console.log(classesByProp[prop])
@@ -126,8 +137,13 @@ function isInPct (value) {
 var getProperties = postcss.plugin('get-properties', function () {
   return function (css, result) {
     css.walkDecls(function (decl) {
-      props[decl.prop] = [] || props[decl.prop]
-      props[decl.prop].push(decl.value)
+      var klass = decl.parent && decl.parent.selectors && decl.parent.selectors[0]
+
+      if (isPresent(klass)) {
+        props[klass] = props[klass] || {}
+        props[klass][decl.prop] = [] || props[klass][decl.prop]
+        props[klass][decl.prop].push(decl.value)
+      }
     })
   }
 })

@@ -14,6 +14,7 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
+    "extend-object": "^1.0.0",
     "get-classes-from-html": "^1.0.1",
     "get-contrast": "^1.1.1",
     "has-class-selector": "^1.0.0",

@@ -81,7 +81,9 @@ function searchForClassFromPropAndVal(klass, prop) {
     //console.log(classesByProp[prop])
 
     closestClass = classesByProp[prop].map(function (obj) {
-      obj.value = getContrast(obj.value, val)
+      if (typeof obj.value !== 'number') {
+        obj.value = getContrast(obj.value, val)
+      }
       return obj
     }).reduce(function (prev, curr) {
       return curr.value < prev.value ? curr : prev
@@ -127,7 +129,7 @@ function convertToRem (value) {
     return value
   }
 
-  return value.replace('px', '').replace('em', '') / 16
+  return value.toString().replace('px', '').replace('em', '') / 16
 }
 
 function isInPx (value) {
@@ -135,7 +137,7 @@ function isInPx (value) {
 }
 
 function isInRem (value) {
-  return value.indexOf('rem') > -1
+  return value.toString().indexOf('rem') > -1
 }
 
 function isInEm (value) {

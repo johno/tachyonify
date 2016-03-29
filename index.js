@@ -127,6 +127,14 @@ function compareValues(val, prev, curr) {
   var prevToCompare = prev.value
   var currToCompare = curr.value
 
+  if (prevToCompare === 'bold') {
+    prevToCompare = 700
+  }
+
+  if (currToCompare === 'bold') {
+    currToCompare = 700
+  }
+
   if (isInPct(val)) {
     if (!isInPct(currToCompare)) {
       return prev

@@ -2,28 +2,15 @@ import test from 'ava'
 import fs from 'fs'
 import tachyonify from './'
 
-test('tachyonify does something awesome', t => {
-  t.plan(1)
+//test('tachyonify does something awesome', t => {
+//  t.plan(1)
+//
+//  const bootstrapCss = fs.readFileSync('node_modules/bootstrap/dist/css/bootstrap.css', 'utf8')
+//  const output = tachyonify('<a href="#!" class="btn btn-default">Hello</a>', bootstrapCss)
+//	console.log(output)
+//  t.same(output, '<a href="#!" class="dib pt1 pr2 pb1 pl2 mb0 code normal lh-title tc nowrap v-mid bt br bb bl br2 dark-gray bg-white-90">Hello</a>')
+//})
 
-  const bootstrapCss = fs.readFileSync('node_modules/bootstrap/dist/css/bootstrap.css', 'utf8')
-  const output = tachyonify('<a href="#!" class="btn btn-default">Hello</a>', bootstrapCss)
-	console.log(output)
-  t.same(output, '<a href="#!" class="dib pt1 pr2 pb1 pl2 mb0 code normal lh-title tc nowrap v-mid bt br bb bl br2 dark-gray bg-white-90">Hello</a>')
-})
-
-test('tachyonify does something awesome', t => {
-  t.plan(1)
-  const input = `
-<div class="btn-group" role="group" aria-label="...">
-  <button type="button" class="btn btn-default">Left</button>
-  <button type="button" class="btn btn-default">Middle</button>
-  <button type="button" class="btn btn-default">Right</button>
-</div>`
-  const bootstrapCss = fs.readFileSync('node_modules/bootstrap/dist/css/bootstrap.css', 'utf8')
-  const output = tachyonify(input, bootstrapCss)
-	console.log(output)
-  t.same(output, '<a href="#!" class="dib pt1 pr2 pb1 pl2 mb0 code normal lh-title tc nowrap v-mid bt br bb bl br2 dark-gray bg-white-90">Hello</a>')
-})
 
 test('tachyonify does something awesome', t => {
   t.plan(1)

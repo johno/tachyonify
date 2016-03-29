@@ -63,13 +63,12 @@ module.exports = function tachyonify (html, css) {
 
   //console.log('---------------------------')
   return replaceClasses(html, resultingClasses)
-
 }
 
 function searchForClassFromPropAndVal(klass, prop) {
   var closestClass = null
-  //console.log('------' + prop + ' with ' + props[klass][prop][0])
-  //console.log(classesByProp[prop])
+  console.log('------' + prop + ' with ' + props[klass][prop][0])
+  console.log(classesByProp[prop])
 
   if (isBlank(classesByProp[prop])) {
     return
@@ -77,14 +76,14 @@ function searchForClassFromPropAndVal(klass, prop) {
 
   if (isColor(props[klass][prop][0])) {
     var val = props[klass][prop][0]
-    //console.log('looking for ' + val)
-    //console.log(classesByProp[prop])
+    console.log('looking for ' + val)
+    console.log(classesByProp[prop])
 
     closestClass = classesByProp[prop].map(function (obj) {
-      if (typeof obj.value !== 'number') {
-        obj.value = getContrast(obj.value, val)
+      return {
+        class: obj.class,
+        value: getContrast(obj.value, val)
       }
-      return obj
     }).reduce(function (prev, curr) {
       return curr.value < prev.value ? curr : prev
     }).class
@@ -94,8 +93,8 @@ function searchForClassFromPropAndVal(klass, prop) {
     if (isNan(val)) {
       val = props[klass][prop][0]
 
-      //console.log('looking for ' + val)
-      //console.log(classesByProp[prop])
+      console.log('looking for ' + val)
+      console.log(classesByProp[prop])
       classesByProp[prop].forEach(function (obj) {
         if (val === obj.value) {
           closestClass = obj.class
@@ -103,23 +102,46 @@ function searchForClassFromPropAndVal(klass, prop) {
       })
     } else {
       var valsForReduce = classesByProp[prop].map(function (obj) {
-        obj.value = convertToRem(obj.value)
-        return obj
-      }).filter(function (obj) {
-        return !isInPct(obj.value)
+        return {
+          class: obj.class,
+          value: convertToRem(obj.value)
+        }
       })
 
       closestClass = valsForReduce.reduce(function (prev, curr) {
-        return (Math.abs(curr.value - val) < Math.abs(prev.value - val) ? curr : prev)
+        console.log(compareValues(val, prev, curr))
+        return compareValues(val, prev, curr)
       }).class
-      //console.log('looking for ' + val)
-      //console.log(valsForReduce)
+      console.log('looking for ' + val)
+      console.log(valsForReduce)
     }
   }
 
-  //console.log(closestClass)
-  //console.log('------')
+  console.log(closestClass)
+  console.log('------')
   return closestClass
+}
+
+function compareValues(val, prev, curr) {
+  var valToCompare = val
+  var prevToCompare = prev.value
+  var currToCompare = curr.value
+
+  if (isInPct(val)) {
+    if (!isInPct(currToCompare)) {
+      return prev
+    }
+
+    if (!isInPct(prevToCompare)) {
+      return curr
+    }
+
+    valToCompare = valToCompare.replace('%', '')
+    prevToCompare = prevToCompare.replace('%', '')
+    currToCompare = currToCompare.replace('%', '')
+  }
+
+  return (Math.abs(currToCompare - valToCompare) < Math.abs(prevToCompare - valToCompare) ? curr : prev)
 }
 
 function convertToRem (value) {

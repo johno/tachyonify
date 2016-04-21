@@ -3,6 +3,7 @@
 var fs = require('fs')
 var postcss = require('postcss')
 var select = require('postcss-select')
+var getElements = require('get-elements')
 var getClasses = require('get-classes-from-html')
 var shorthandExpand = require('postcss-shorthand-expand')
 var removeComments = require('postcss-discard-comments')
@@ -26,13 +27,18 @@ module.exports = function tachyonify (html, css) {
     return '.' + klass
   })
 
-  postcss([ select(classes), removeEmpty(), shorthandExpand(), getProperties() ]).process(css).css
+  var elements = getElements(html)
+  var selectors = classes.concat(elements)
+
+  console.log(selectors)
+
+  postcss([ select(selectors), removeEmpty(), shorthandExpand(), getProperties() ]).process(css).css
   var propsToSelect = {}
   Object.keys(props).forEach(function (klass) {
     extendObj(propsToSelect, props[klass])
   })
   //console.log('----')
-  //console.log(propsToSelect)
+  console.log(propsToSelect)
   //console.log('----')
   postcss([ removeMediaQueries(), selectByProperty(propsToSelect), removeEmpty(), removeComments({ removeAll: true }) ]).process(tachyonsCss).css
 
@@ -62,13 +68,15 @@ module.exports = function tachyonify (html, css) {
   //console.log(resultingClasses)
 
   //console.log('---------------------------')
-  return replaceClasses(html, resultingClasses)
+  var newHtml = replaceClasses(html, resultingClasses)
+  console.log(newHtml)
+  return newHtml
 }
 
 function searchForClassFromPropAndVal(klass, prop) {
   var closestClass = null
-  console.log('------' + prop + ' with ' + props[klass][prop][0])
-  console.log(classesByProp[prop])
+  //console.log('------' + prop + ' with ' + props[klass][prop][0])
+  //console.log(classesByProp[prop])
 
   if (isBlank(classesByProp[prop])) {
     return
@@ -76,8 +84,9 @@ function searchForClassFromPropAndVal(klass, prop) {
 
   if (isColor(props[klass][prop][0])) {
     var val = props[klass][prop][0]
-    console.log('looking for ' + val)
-    console.log(classesByProp[prop])
+    if (val === 'inherit') { return }
+  //  console.log('looking for ' + val)
+  //  console.log(classesByProp[prop])
 
     closestClass = classesByProp[prop].map(function (obj) {
       return {
@@ -93,8 +102,6 @@ function searchForClassFromPropAndVal(klass, prop) {
     if (isNan(val)) {
       val = props[klass][prop][0]
 
-      console.log('looking for ' + val)
-      console.log(classesByProp[prop])
       classesByProp[prop].forEach(function (obj) {
         if (val === obj.value) {
           closestClass = obj.class
@@ -109,16 +116,11 @@ function searchForClassFromPropAndVal(klass, prop) {
       })
 
       closestClass = valsForReduce.reduce(function (prev, curr) {
-        console.log(compareValues(val, prev, curr))
         return compareValues(val, prev, curr)
       }).class
-      console.log('looking for ' + val)
-      console.log(valsForReduce)
     }
   }
 
-  console.log(closestClass)
-  console.log('------')
   return closestClass
 }
 
@@ -203,6 +205,7 @@ var removeMediaQueries = postcss.plugin('remove-at-rules', function () {
 var selectByProperty = postcss.plugin('select-by-property', function (propsToCheck) {
   return function (css) {
     css.walkRules(function (rule) {
+      // TODO: MORE THAN JUST CLASSES, SHOULD HANDLE ELEMENTS, TOO
       var hasClassSelector = rule.selectors.some(function (selector) {
         return hasClass(selector)
       })

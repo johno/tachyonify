@@ -17,6 +17,7 @@
     "extend-object": "^1.0.0",
     "get-classes-from-html": "^1.0.1",
     "get-contrast": "^1.1.1",
+    "get-elements": "^0.1.0",
     "has-class-selector": "^1.0.0",
     "is-blank": "^1.1.0",
     "is-color": "^0.2.0",
